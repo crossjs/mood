@@ -13,6 +13,9 @@ module.exports = function(grunt) {
   // load all grunt tasks
   require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
 
+  var transport = require('grunt-cmd-transport');
+  var style = transport.style.init(grunt);
+
   grunt.initConfig({
 
     pkg: grunt.file.readJSON('package.json'),
@@ -80,19 +83,61 @@ module.exports = function(grunt) {
       }
     },
 
+    wrap: {
+      css: {
+        cwd: 'src/',
+        expand: true,
+        src: ['*.css'],
+        dest: 'src/',
+        options: {
+          separator: '',
+          compiler: function (content, options) {
+            return ['\'', content
+              .replace(/[\n\r]/g, '')
+              .replace(/\t/g, '')
+              .replace(/:\s+/g, ':')
+              .replace(/\s+\{/g, '{')
+              .replace(/\\/g, '\\\\'), '\''].join('');
+          },
+          wrapper: ['define(', ');']
+        },
+        ext: '.css.js'
+      }
+    },
+
     transport: {
       options: {
         debug: true,
         idleading: '<%= pkg.family %>/<%= pkg.name %>/<%= pkg.version %>/',
         alias: '<%= pkg.spm.alias %>'
       },
-      dist: {
+      js: {
         files: [{
           expand: true,
           cwd: 'src/',
-          src: ['*.js'],
-          dest: '.build/',
-          ext: '.js'
+          src: ['*.js', '!*.css.js'],
+          dest: '.build/'
+        }]
+      },
+      handlebars: {
+        files: [{
+          expand: true,
+          cwd: 'src/',
+          src: ['*.handlebars'],
+          dest: '.build/'
+        }]
+      },
+      css: {
+        options: {
+          parsers: {
+            '.css' : [style.css2jsParser]
+          }
+        },
+        files: [{
+          expand: true,
+          cwd: 'src/',
+          src: ['*.css'],
+          dest: '.build/'
         }]
       }
     },
@@ -100,16 +145,15 @@ module.exports = function(grunt) {
     concat: {
       options: {
         debug: true,
-        include: 'self',
-        paths: ['']
+        include: 'relative',
+        css2js: transport.style.css2js
       },
       src: {
         files: [{
           expand: true,
           cwd: '.build/',
           src: ['*.js'],
-          dest: 'dist/',
-          ext: '.js'
+          dest: 'dist/'
         }]
       }
     },
@@ -132,9 +176,8 @@ module.exports = function(grunt) {
         files: [{
           expand: true,
           cwd: 'dist/',
-          src: ['*.js', '!*-debug.js'],
-          dest: 'dist/',
-          ext: '.js'
+          src: ['*.js', '!*-debug*.js'],
+          dest: 'dist/'
         }]
       }
     }

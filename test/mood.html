@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>base</title>
+<title>mood</title>
 <link rel="stylesheet" href="../vendor/qunit/qunit.css">
 </head>
 <body>
@@ -14,6 +14,7 @@
     <div id="qunit-fixture">test markup</div>
     <script src="../vendor/jquery/jquery.js"></script>
     <script src="../vendor/seajs/sea.js"></script>
+    <script src="../vendor/seajs/seajs-text.js"></script>
     <script src="../vendor/qunit/qunit.js"></script>
     <script>
         QUnit.config.autostart = false;
@@ -24,11 +25,11 @@
             ],
             'alias': {
               '$': 'jquery',
-              'class': 'crossjs/class/1.0.0/class',
-              'events': 'crossjs/events/1.0.0/events'
+              'handlebars': 'gallery/handlebars/1.0.2/handlebars',
+              'widget': 'pandora/widget/1.0.0/widget'
             }
         });
-        seajs.use(['./base.js']);
+        seajs.use(['./mood.js']);
     </script>
 </body>
 </html>

@@ -1,16 +1,16 @@
 {
-  "name": "base",
+  "name": "mood",
   "version": "1.0.0",
-  "description": "widget base, inherits class, extends events",
-  "keywords": [ "base", "seajs", "modules" ],
-  "homepage": "https://github.com/crossjs/base",
+  "description": "widget mood",
+  "keywords": [ "mood", "seajs", "modules" ],
+  "homepage": "https://github.com/crossjs/mood",
   "bugs": {
-    "url": "https://github.com/crossjs/base/issues"
+    "url": "https://github.com/crossjs/mood/issues"
   },
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/crossjs/base/blob/master/LICENSE-MIT"
+      "url": "https://github.com/crossjs/mood/blob/master/LICENSE-MIT"
     }
   ],
   "author": {
@@ -20,7 +20,7 @@
   "main": "Gruntfile.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/crossjs/base.git"
+    "url": "git://github.com/crossjs/mood.git"
   },
   "scripts": {
     "test": "grunt qunit"
@@ -40,15 +40,18 @@
     "grunt-cmd-transport": "*",
     "grunt-cmd-concat": "*",
     "grunt-qunit-istanbul": "*",
+    "grunt-wrap-combo": "*",
     "matchdep": "*"
   },
-  "family": "crossjs",
+  "family": "pandora",
   "spm": {
-    "output": [ "base.js" ],
+    "output": [ "mood.js" ],
     "alias": {
       "$": "$",
-      "class": "crossjs/class/1.0.0/class",
-      "events": "crossjs/events/1.0.0/events"
+      "handlebars": "gallery/handlebars/1.0.2/runtime",
+      "widget": "pandora/widget/1.0.0/widget"
+    },
+    "devAlias": {
     }
   }
 }

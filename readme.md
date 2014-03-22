@@ -1,15 +1,15 @@
-#base
+#mood
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/crossjs/base/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-[![Build Status](https://api.travis-ci.org/crossjs/base.png?branch=master)](http://travis-ci.org/crossjs/base)
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/crossjs/mood/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+[![Build Status](https://api.travis-ci.org/crossjs/mood.png?branch=master)](http://travis-ci.org/crossjs/mood)
 [![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
 
  > seajs module
 
 ##how to require
 
-1. run `spm install crossjs/base`
-1. write `require('crossjs/base/VERSION.NUMBER/base')`
+1. run `spm install pandora/mood`
+1. write `require('pandora/mood/VERSION.NUMBER/mood')`
 
 ##how to build
 
@@ -20,4 +20,4 @@
 
 ##history
 
-- 1.0.0 - init
+- 1.0.0 - release
