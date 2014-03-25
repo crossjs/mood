@@ -2,6 +2,7 @@ define(function (require, exports, module) {
 
 /**
  * 表情投票
+ *
  * @module Mood
  */
 
@@ -11,64 +12,69 @@ var $ = require('$'),
   Widget = require('widget');
 
 /**
- * 表情投票
+ * 数据层类
+ *
+ * @class Core
+ * @constructor
  */
 var Core = Widget.extend({
 
   setup: function () {
-    // 后端接口参数
-    this.params = {
-      channel: this.options.channelId,
-      'web_id': this.options.webId,
+    // 设置后端接口参数
+    this.data('params', {
+      channel: this.option('channelId'),
+      'web_id': this.option('webId'),
       // 拷贝自V2
       // TODO: 做一个从CMS kindId到hits系统kind的映射, 因为并不完全一一对应
-      kind: this.options.kindId
-    };
+      kind: this.option('kindId')
+    });
 
     // 初始化状态
     this.state(Core.STATE.NORMAL);
   },
 
   load: function () {
-    var params = $.extend({
-      action: '0'
-    }, this.params);
+    var self = this,
+      params = $.extend({
+        action: '0'
+      }, this.data('params'));
+
+    this.fire('load');
 
     this.state(Core.STATE.RECEIVING);
-    loadAPI.call(this, params,
-      $.proxy(this.done, this),
-      $.proxy(this.fail, this));
+
+    bridge.call(this, params,
+      function (data, xhr) {
+        self.fire('done', 'load', data);
+      },
+      function (xhr, error) {
+        self.fire('fail', 'load', error);
+      });
   },
 
   vote: function (index) {
-    var params = $.extend({
-      action: '1',
-      mood: index + 1
-    }, this.params);
+    var self = this,
+      params = $.extend({
+        action: '1',
+        mood: index + 1
+      }, this.data('params'));
+
+    this.fire('vote');
 
     this.state(Core.STATE.SENDING);
-    loadAPI.call(this, params,
-      $.proxy(this.done, this),
-      $.proxy(this.fail, this));
-  },
 
-  done: function (data, xhr) {
-    this.state(Core.STATE.NORMAL);
-    if ('console' in window) {
-      console.log('MOOD AJAX DONE: %O ', data);
-    }
-  },
-
-  fail: function (xhr, error) {
-    this.state(Core.STATE.ERROR);
-    if ('console' in window) {
-      console.log('MOOD AJAX ERROR: %s ', error);
-    }
+    bridge.call(this, params,
+      function (data, xhr) {
+        self.fire('done', 'vote', data);
+      },
+      function (xhr, error) {
+        self.fire('fail', 'vote', error);
+      });
   }
 
 });
 
-function loadAPI (params, done, fail) {
+function bridge (params, done, fail) {
   $.getJSON(Core.URL, params)
     .done(done)
     .fail(fail);

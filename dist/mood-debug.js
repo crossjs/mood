@@ -8,117 +8,147 @@ define("pandora/mood/1.0.0/mood-debug", [ "$-debug", "./core-debug", "pandora/wi
     var Handlebars = require("gallery/handlebars/1.0.2/runtime-debug");
     var template = require("./template-debug.handlebars");
     require("./default-debug.css");
-    var defaults = {
-        element: '<div class="ue-component ue-mood"/>',
-        template: template,
-        helpers: {
-            helpers: {
-                ratio: function(value, total) {
-                    return value / total * 100 + "%";
-                },
-                equal: function(value, value2, options) {
-                    return value === value2 ? options.fn(this) : options.inverse(this);
-                }
-            }
-        }
-    };
     /**
- * 表情投票
+ * 表现层类
+ *
+ * @class Mood
+ * @constructor
+ *
+ * @example
+ * ```
+ * var mood = new Mood({
+ *   container: $('<div/>').appendTo('body'),
+ *   channelId: '10009',
+ *   webId: '2814902',
+ *   kindId: '1',
+ *   moods: 'NEWS'
+ * });
+ * ```
  */
     var Mood = Core.extend({
-        setup: function() {
-            Mood.superclass.setup.call(this);
-            $.extend(this.options, defaults, {
-                data: {
-                    moods: Mood.PRESETS[this.options.moods || "ZHUANQU"],
-                    total: 0,
-                    max: 0
+        /**
+   * 默认参数
+   *
+   * @property {Object} defaults 默认参数
+   * @type {Object}
+   */
+        defaults: {
+            element: '<div class="ue-component ue-mood"/>',
+            delegates: {
+                "click .ue-mood-item": function(e) {
+                    var el = e.currentTarget;
+                    this.vote($(el).index());
+                },
+                "mouseover .ue-mood-smiley": function(e) {
+                    var el = e.currentTarget;
+                    el.originalSrc = el.src;
+                    el.src = el.attributes["data-mood-ani"].value;
+                },
+                "mouseout .ue-mood-smiley": function(e) {
+                    var el = e.currentTarget;
+                    el.src = el.originalSrc;
                 }
-            });
-            this.init();
-            this.render();
-            this.load();
+            },
+            moods: "ZHUANQU",
+            template: template,
+            helpers: {
+                helpers: {
+                    ratio: function(value, total) {
+                        return value / total * 100 + "%";
+                    },
+                    equal: function(value, value2, options) {
+                        return value === value2 ? options.fn(this) : options.inverse(this);
+                    }
+                }
+            }
         },
-        init: function() {
-            this.after("render", function(e) {
-                var self = this;
-                this.element.on("click", ".ue-mood-item", function() {
-                    self.vote($(this).index());
-                }).on("mouseover", ".ue-mood-smiley", function() {
-                    this.originalSrc = this.src;
-                    this.src = this.attributes["data-mood-ani"].value;
-                }).on("mouseout", ".ue-mood-smiley", function() {
-                    this.src = this.originalSrc;
-                });
+        setup: function() {
+            // 调用 Core 的 setup
+            Mood.superclass.setup.call(this);
+            // 设置默认数据
+            this.data({
+                moods: Mood.PRESETS[this.option("moods")],
+                total: 0,
+                max: 0
             });
-            this.after("state", function(e, result, state) {
-                switch (state) {
-                  case Core.STATE.ERROR:
-                    this.showInfo("请求失败");
-                    break;
-
-                  case Core.STATE.NORMAL:
-                    this.hideInfo();
-                    break;
-
-                  case Core.STATE.RECEIVING:
-                    this.showInfo("数据加载中……");
-                    break;
-
-                  case Core.STATE.SENDING:
-                    this.showInfo("数据发送中……");
-                    break;
-                }
+            this.on("load", function(e) {
+                this.showInfo("数据加载中……");
             });
-            this.after("done", function(e, result, data) {
-                switch (data.flag) {
-                  case "1":
-                    // 1: 成功
+            this.on("vote", function(e) {
+                this.showInfo("数据发送中……");
+            });
+            this.on("done", function(e, type, data) {
+                if (type === "load") {
+                    // 数据加载成功
+                    this.showInfo("数据加载成功");
                     parseData.call(this, data.data);
                     this.refresh();
-                    break;
+                } else if (type === "vote") {
+                    // 数据发送成功
+                    switch (data.flag) {
+                      case "1":
+                        // 1: 成功
+                        this.showInfo("投票成功，感谢你的参与");
+                        parseData.call(this, data.data);
+                        this.refresh();
+                        break;
 
-                  case "2":
-                    // 2：失败
-                    break;
+                      case "2":
+                        // 2：失败
+                        break;
 
-                  case "3":
-                    // 3：参数不全
-                    break;
+                      case "3":
+                        // 3：参数不全
+                        break;
 
-                  case "9":
-                    this.showInfo("您的IP今天已经投过票了, 感谢您的参与");
-                    break;
+                      case "9":
+                        this.showInfo("您的IP今天已经投过票了, 感谢您的参与");
+                        break;
+                    }
                 }
             });
+            this.on("fail", function(e, type, data) {
+                if (type === "load") {
+                    this.showInfo("数据加载失败");
+                } else if (type === "vote") {
+                    this.showInfo("数据发送失败");
+                }
+            });
+            this.load();
         },
         refresh: function() {
-            this.element.html(this.options.template(this.options.data, this.options.helpers));
+            if (!this.rendered) {
+                this.render();
+            }
+            this.element.html(this.option("template")(this.data(), this.option("helpers")));
+            this.hideInfo();
         },
         showInfo: function(info) {
             if (this.element) {
                 this.element.find(".ue-mood-msgbox").text(info).fadeIn();
             } else {
-                this.options.data.msg = info;
+                this.data("msg", info);
             }
         },
         hideInfo: function() {
             if (this.element) {
                 this.element.find(".ue-mood-msgbox").fadeOut();
             } else {
-                this.options.data.msg = "";
+                this.data("msg", "");
             }
         }
     });
+    //data: '1#3438,2#411,3#156,4#98,5#200,6#95,7#434,8#19,9#0,10#0'
     function parseData(data) {
         /*jshint validthis: true*/
-        // '1#3438,2#411,3#156,4#98,5#200,6#95,7#434,8#19,9#0,10#0'
-        var options = this.options, arr = data.match(/\d+(?!#|\d)/g).slice(0, options.data.moods.length), total = 0;
-        $.each(options.data.moods, $.proxy(function(i, n) {
+        var arr = data.match(/\d+(?!#|\d)/g).slice(0, this.data("moods").length), total = 0;
+        $.each(this.data("moods"), $.proxy(function(i, n) {
             total += n.value = +arr[i];
         }, this));
-        options.data.total = total;
-        options.data.max = Math.max.apply(null, arr);
+        this.data({
+            total: total,
+            max: Math.max.apply(null, arr)
+        });
     }
     Mood.PRESETS = {
         ZHUANQU: [ {
@@ -184,62 +214,65 @@ define("pandora/mood/1.0.0/mood-debug", [ "$-debug", "./core-debug", "pandora/wi
             ani: "http://ue1.17173.itc.cn/2009newsend/2012/fennu-2.gif"
         } ]
     };
-    Mood.STATE = Core.STATE;
+    Mood.Core = Core;
+    // Mood.STATE = Core.STATE;
     module.exports = Mood;
 });
 
 define("pandora/mood/1.0.0/core-debug", [ "$-debug", "pandora/widget/1.0.0/widget-debug", "pandora/class/1.0.0/class-debug", "pandora/events/1.0.0/events-debug", "pandora/widget/1.0.0/aspect-debug" ], function(require, exports, module) {
     /**
  * 表情投票
+ *
  * @module Mood
  */
     "use strict";
     var $ = require("$-debug"), Widget = require("pandora/widget/1.0.0/widget-debug");
     /**
- * 表情投票
+ * 数据层类
+ *
+ * @class Core
+ * @constructor
  */
     var Core = Widget.extend({
         setup: function() {
-            // 后端接口参数
-            this.params = {
-                channel: this.options.channelId,
-                web_id: this.options.webId,
+            // 设置后端接口参数
+            this.data("params", {
+                channel: this.option("channelId"),
+                web_id: this.option("webId"),
                 // 拷贝自V2
                 // TODO: 做一个从CMS kindId到hits系统kind的映射, 因为并不完全一一对应
-                kind: this.options.kindId
-            };
+                kind: this.option("kindId")
+            });
             // 初始化状态
             this.state(Core.STATE.NORMAL);
         },
         load: function() {
-            var params = $.extend({
+            var self = this, params = $.extend({
                 action: "0"
-            }, this.params);
+            }, this.data("params"));
+            this.fire("load");
             this.state(Core.STATE.RECEIVING);
-            loadAPI.call(this, params, $.proxy(this.done, this), $.proxy(this.fail, this));
+            bridge.call(this, params, function(data, xhr) {
+                self.fire("done", "load", data);
+            }, function(xhr, error) {
+                self.fire("fail", "load", error);
+            });
         },
         vote: function(index) {
-            var params = $.extend({
+            var self = this, params = $.extend({
                 action: "1",
                 mood: index + 1
-            }, this.params);
+            }, this.data("params"));
+            this.fire("vote");
             this.state(Core.STATE.SENDING);
-            loadAPI.call(this, params, $.proxy(this.done, this), $.proxy(this.fail, this));
-        },
-        done: function(data, xhr) {
-            this.state(Core.STATE.NORMAL);
-            if ("console" in window) {
-                console.log("MOOD AJAX DONE: %O ", data);
-            }
-        },
-        fail: function(xhr, error) {
-            this.state(Core.STATE.ERROR);
-            if ("console" in window) {
-                console.log("MOOD AJAX ERROR: %s ", error);
-            }
+            bridge.call(this, params, function(data, xhr) {
+                self.fire("done", "vote", data);
+            }, function(xhr, error) {
+                self.fire("fail", "vote", error);
+            });
         }
     });
-    function loadAPI(params, done, fail) {
+    function bridge(params, done, fail) {
         $.getJSON(Core.URL, params).done(done).fail(fail);
     }
     Core.STATE = {
