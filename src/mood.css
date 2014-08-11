@@ -8,9 +8,14 @@
 	font-weight: bold;
 }
 
+.mood-ui-default table {
+	width: 100%;
+}
+
 .mood-ui-default td {
 	font-size: 14px;
 	color: #2b2b2b;
+	cursor: pointer;
 }
 
 .mood-ui-default .rect-wrapper {
@@ -22,13 +27,17 @@
 	background-color: #f7f7f7;
 }
 
+.mood-ui-default td:hover .rect-wrapper {
+	border: 1px solid #999;
+}
+
 .mood-ui-default .rect {
 	position: absolute;
 	bottom: 1px;
 	left: 1px;
 }
 
-.mood-ui-default .ue-mood-smiley {
+.mood-ui-default .smiley {
 	cursor: pointer;
 }
 
@@ -44,4 +53,5 @@
 	border: 1px solid gray;
 	position: absolute;
 	z-index: 100;
+	display: none;
 }

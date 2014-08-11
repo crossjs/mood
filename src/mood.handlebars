@@ -1,0 +1,18 @@
+<div class="mood-ui-default">
+  <div class="msgbox" data-role="msgbox">{{msg}}</div>
+  <table>
+    <caption class="total" data-role="total">{{total}}</caption>
+    <tr>
+    {{#moods}}
+      <td align="center" class="item" data-index="{{@index}}" data-role="item">
+        <span class="value">{{value}}</span>
+        <div class="rect-wrapper">
+          <img class="rect" width="31" height="{{percent}}" src="http://ue2.17173.itc.cn/images/lib/v2/mood-1.0/default-rect-{{#if isMax}}max{{else}}normal{{/if}}.gif">
+        </div>
+        <img class="smiley" src="{{img}}" data-role="smiley">
+        <div>{{name}}</div>
+      </td>
+    {{/moods}}
+    </tr>
+  </table>
+</div>
