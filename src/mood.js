@@ -43,10 +43,13 @@ define(function(require, exports, module) {
      */
     defaults: {
       classPrefix: 'ue-component ue-mood',
+      container: null,
       // element: '<div class="ue-component ue-mood"/>',
       delegates: {
         'click [data-role=item]': function(e) {
-          this.vote($(e.currentTarget).data('index'));
+          if (!this.disabled) {
+            this.vote($(e.currentTarget).data('index'));
+          }
         },
         'mouseover [data-role=item]': function(e) {
           var el = e.currentTarget;
@@ -79,7 +82,8 @@ define(function(require, exports, module) {
       this.data({
         moods: Mood.PRESETS[this.option('moods')],
         total: 0,
-        max: 0
+        max: 0,
+        type: this.option('moods') === 'NEWS' ? '新闻' : '文章'
       });
 
       // this.on('load', function(e) {
@@ -114,6 +118,7 @@ define(function(require, exports, module) {
 
             case '9':
               this.showTip('您的IP今天已经投过票了, 感谢您的参与');
+              this.disabled = true;
               break;
           }
         }
@@ -163,27 +168,13 @@ define(function(require, exports, module) {
     showTip: function(info) {
       new Tips({
         baseElement: this.element,
-        // baseXY: {
-        //   x: 0.5,
-        //   y: 0.5
-        // },
-        content: info
+        content: info,
+        css: {
+          position: 'absolute'
+        },
+        // 引入 dialog 样式
+        importStyle: true
       });
-      // var self = this;
-
-      // if (self.element) {
-      //   if (self.timeout) {
-      //     window.clearTimeout(self.timeout);
-      //   }
-
-      //   self.role('msgbox').text(info).fadeIn();
-
-      //   self.timeout = window.setTimeout(function () {
-      //     self.hideMsg();
-      //   }, 1000);
-      // } else {
-      //   self.data('msg', info);
-      // }
     }
 
   });
