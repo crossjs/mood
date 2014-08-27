@@ -107,7 +107,7 @@ module.exports = function(grunt) {
         idleading: '<%= idleading %>',
         alias: '<%= pkg.spm.alias %>'
       },
-      all: {
+      src: {
         files: [{
           expand: true,
           cwd: 'src/',

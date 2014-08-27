@@ -1,10 +1,9 @@
 #mood
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/crossjs/mood/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-[![Build Status](https://api.travis-ci.org/crossjs/mood.png?branch=master)](http://travis-ci.org/crossjs/mood)
-[![Built with Grunt](https://cdn.gruntjs.com/builtwith.png)](http://gruntjs.com/)
+[![Build Status](https://api.travis-ci.org/pandorajs/mood.png?branch=master)](http://travis-ci.org/pandorajs/mood)
+[![Coverage Status](https://coveralls.io/repos/pandorajs/mood/badge.png?branch=master)](https://coveralls.io/r/pandorajs/mood?branch=master)
 
- > seajs module
+ > mood vote, seajs module
 
 ##how to require
 
@@ -21,3 +20,7 @@
 ##history
 
 - 1.0.0 - release
+
+##remote api
+
+- http://ued.local.17173.com/wiki/pages/viewpage.action?pageId=3019577

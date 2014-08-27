@@ -1,18 +1,15 @@
-<div class="mood-ui-default">
-  <div class="msgbox" data-role="msgbox">{{msg}}</div>
-  <table>
-    <caption data-role="total">看完这篇{{type}}有何感觉？已经有 <span class="total">{{total}}</span> 人表态</caption>
-    <tr>
-    {{#moods}}
-      <td align="center" class="item" data-index="{{@index}}" data-role="item">
-        <span class="value">{{value}}</span>
-        <div class="rect-wrapper">
-          <img class="rect" width="31" height="{{percent}}" src="http://ue2.17173.itc.cn/images/lib/v2/mood-1.0/default-rect-{{#if isMax}}max{{else}}normal{{/if}}.gif">
-        </div>
-        <img class="smiley" src="{{img}}" data-role="smiley">
-        <div>{{name}}</div>
-      </td>
-    {{/moods}}
-    </tr>
-  </table>
-</div>
+<table>
+  <caption data-role="total">看完这篇文章有何感觉？已经有 <span class="total">{{total}}</span> 人表态</caption>
+  <tr>
+  {{#each moods}}
+    <td class="item" data-index="{{@index}}" data-role="item">
+      <span class="value">{{value}}</span>
+      <div class="rect-wrapper">
+        <img class="rect" width="31" height="{{percent}}" src="http://ue2.17173.itc.cn/images/lib/v2/mood-1.0/default-rect-{{#if isMax}}max{{else}}normal{{/if}}.gif">
+      </div>
+      <img class="smiley" src="{{img}}" data-role="smiley">
+      <div>{{name}}</div>
+    </td>
+  {{/each}}
+  </tr>
+</table>

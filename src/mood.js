@@ -7,10 +7,10 @@ define(function(require, exports, module) {
 
   'use strict';
 
-  var $ = require('$'),
-    Tips = require('tips');
+  var $ = require('$');
 
-  var Core = require('./core');
+  var Core = require('./core'),
+    PRESETS = require('./presets');
 
   // 样式表
   var importStyle = require('./mood.css'),
@@ -25,10 +25,10 @@ define(function(require, exports, module) {
    * @example
    * ```
    * var mood = new Mood({
-   *   container: $('<div/>').appendTo('body'),
-   *   channelId: '10009',
+   *   container: '#mood-news',
+   *   channel: '10009',
    *   webId: '2814902',
-   *   kindId: '1',
+   *   kind: '1',
    *   moods: 'NEWS'
    * });
    * ```
@@ -42,26 +42,19 @@ define(function(require, exports, module) {
      * @type {object}
      */
     defaults: {
-      classPrefix: 'ue-component ue-mood',
+      classPrefix: 'ue-mood',
       container: null,
-      // element: '<div class="ue-component ue-mood"/>',
       delegates: {
         'click [data-role=item]': function(e) {
-          if (!this.disabled) {
+          if (this.state() !== Core.STATE.DISABLED) {
             this.vote($(e.currentTarget).data('index'));
           }
         },
-        'mouseover [data-role=item]': function(e) {
-          var el = e.currentTarget;
-          $(el).find('[data-role=smiley]')
-            .attr('src',
-              this.data('moods')[$(el).data('index')]['ani']);
+        'mouseenter [data-role=item]': function(e) {
+          this.mouseenter($(e.currentTarget));
         },
-        'mouseout [data-role=item]': function(e) {
-          var el = e.currentTarget;
-          $(el).find('[data-role=smiley]')
-            .attr('src',
-              this.data('moods')[$(el).data('index')]['img']);
+        'mouseleave [data-role=item]': function(e) {
+          this.mouseleave($(e.currentTarget));
         }
       },
       importStyle: true,
@@ -70,72 +63,47 @@ define(function(require, exports, module) {
     },
 
     setup: function() {
-      // 调用 Core 的 setup
-      Mood.superclass.setup.apply(this);
+      var self = this,
+        moods;
 
-      if (this.option('importStyle') && !styleImported) {
+      // 调用 Core 的 setup
+      Mood.superclass.setup.apply(self);
+
+      if (!self.url) {
+        // 缺少URL
+        return;
+      }
+
+      if (!self.params.channel ||
+        !self.params['web_id'] ||
+        !self.params.kind) {
+        // 缺少参数
+        return;
+      }
+
+      if (self.option('importStyle') && !styleImported) {
         importStyle();
         styleImported = true;
       }
 
+      moods = self.option('moods');
+
       // 设置默认数据
-      this.data({
-        moods: Mood.PRESETS[this.option('moods')],
+      self.data({
+        moods: PRESETS[moods],
         total: 0,
-        max: 0,
-        type: this.option('moods') === 'NEWS' ? '新闻' : '文章'
+        max: 0
       });
 
-      // this.on('load', function(e) {
-      //   this.showTip('数据加载中……');
-      // });
-
-      this.on('vote', function(e) {
-        this.showTip('数据发送中……');
-      });
-
-      this.on('done', function(e, type, data) {
-        if (type === 'load') {
-          // 数据加载成功
-          // this.showTip('数据加载成功');
-          this.parseData(data.data);
-          this.render();
-        } else if (type === 'vote') {
-          // 数据发送成功
-          switch (data.flag) {
-
-            case '1': // 1: 成功
-              this.showTip('投票成功，感谢你的参与');
-              this.parseData(data.data);
-              this.render();
-              break;
-
-            case '2': // 2：失败
-              break;
-
-            case '3': // 3：参数不全
-              break;
-
-            case '9':
-              this.showTip('您的IP今天已经投过票了, 感谢您的参与');
-              this.disabled = true;
-              break;
-          }
-        }
-      });
-
-      this.on('fail', function(e, type, data) {
-        if (type === 'load') {
-          this.showTip('数据加载失败');
-        } else if (type === 'vote') {
-          this.showTip('数据发送失败');
-        }
-      });
-
-      this.load();
+      self.load();
     },
 
-    // data: '1#3438,2#411,3#156,4#98,5#200,6#95,7#434,8#19,9#0,10#0'
+    /**
+     * 解析服务端返回的数据
+     * 1#3438,2#411,3#156,4#98,5#200,6#95,7#434,8#19,9#0,10#0
+     *
+     * @param {string} data 逗号分隔的字符串
+     */
     parseData: function(data) {
       var moods = this.data('moods'),
         n = moods.length,
@@ -165,87 +133,47 @@ define(function(require, exports, module) {
       });
     },
 
-    showTip: function(info) {
-      new Tips({
-        baseElement: this.element,
-        content: info,
-        css: {
-          position: 'absolute'
-        },
-        // 引入 dialog 样式
-        importStyle: true
-      });
+    mouseenter: function(item) {
+      var index = item.data('index');
+
+      // if (!this.is('.' + this.option('classDisabled'))) {
+        item.find('[data-role=smiley]')
+          .attr('src',
+            this.data('moods')[index]['ani']);
+      // }
+
+      /**
+       * 通知鼠标移入投票项
+       *
+       * @event enter
+       * @param {object} e Event.
+       * @param {number} index 投票项索引值
+       */
+      this.fire('enter', index);
+    },
+
+    mouseleave: function(item) {
+      var index = item.data('index');
+
+      // if (!this.is('.' + this.option('classDisabled'))) {
+        item.find('[data-role=smiley]')
+          .attr('src',
+            this.data('moods')[index]['img']);
+      // }
+
+      /**
+       * 通知鼠标移出投票项
+       *
+       * @event enter
+       * @param {object} e Event.
+       * @param {number} index 投票项索引值
+       */
+      this.fire('leave', index);
     }
 
   });
 
-  Mood.PRESETS = {
-    ZHUANQU: [{
-      name: '囧雷无比',
-      img: 'http://ue1.17173.itc.cn/2009newsend/jiong_1.gif',
-      ani: 'http://ue1.17173.itc.cn/2009newsend/jiong_2.gif'
-    }, {
-      name: '酱油路过',
-      img: 'http://i3.17173.itc.cn/2011/news/2011/05/19/jy1.gif',
-      ani: 'http://i3.17173.itc.cn/2011/news/2011/05/19/jy2.gif'
-    }, {
-      name: '保持关注',
-      img: 'http://ue1.17173.itc.cn/2009newsend/guanzhu_1.gif',
-      ani: 'http://ue1.17173.itc.cn/2009newsend/guanzhu_2.gif'
-    }, {
-      name: '十分精彩',
-      img: 'http://ue1.17173.itc.cn/2009newsend/se_1.gif',
-      ani: 'http://ue1.17173.itc.cn/2009newsend/se_2.gif'
-    }, {
-      name: '值得一看',
-      img: 'http://ue1.17173.itc.cn/2009newsend/bucuo_1.gif',
-      ani: 'http://ue1.17173.itc.cn/2009newsend/bucuo_2.gif'
-    }, {
-      name: '怒发冲冠',
-      img: 'http://i3.17173.itc.cn/2011/www/fl00.gif',
-      ani: 'http://i2.17173.itc.cn/2011/www/fl11.gif'
-    }, {
-      name: '不知所云',
-      img: 'http://i3.17173.itc.cn/2011/www/yw00.gif',
-      ani: 'http://i2.17173.itc.cn/2011/www/yw11.gif'
-    }],
-
-    NEWS: [{
-      name: '蛋疼',
-      img: 'http://ue1.17173.itc.cn/2009newsend/2012/danteng-1.gif',
-      ani: 'http://ue1.17173.itc.cn/2009newsend/2012/danteng-2.gif'
-    }, {
-      name: '恶心',
-      img: 'http://ue1.17173.itc.cn/2009newsend/tu_1.gif',
-      ani: 'http://ue1.17173.itc.cn/2009newsend/tu_2.gif'
-    }, {
-      name: '期待',
-      img: 'http://ue1.17173.itc.cn/2009newsend/se_1.gif',
-      ani: 'http://ue1.17173.itc.cn/2009newsend/se_2.gif'
-    }, {
-      name: '难过',
-      img: 'http://ue1.17173.itc.cn/2009newsend/ku_1.gif',
-      ani: 'http://ue1.17173.itc.cn/2009newsend/ku_2.gif'
-    }, {
-      name: '碉堡',
-      img: 'http://ue1.17173.itc.cn/2009newsend/2012/diaobao-1.gif',
-      ani: 'http://ue1.17173.itc.cn/2009newsend/2012/diaobao-2.gif'
-    }, {
-      name: '关注',
-      img: 'http://ue1.17173.itc.cn/2009newsend/guanzhu_1.gif',
-      ani: 'http://ue1.17173.itc.cn/2009newsend/guanzhu_2.gif'
-    }, {
-      name: '酱油',
-      img: 'http://i3.17173.itc.cn/2011/news/2011/05/19/jy1.gif',
-      ani: 'http://i3.17173.itc.cn/2011/news/2011/05/19/jy2.gif'
-    }, {
-      name: '愤怒',
-      img: 'http://ue1.17173.itc.cn/2009newsend/2012/fennu-1.gif',
-      ani: 'http://ue1.17173.itc.cn/2009newsend/2012/fennu-2.gif'
-    }]
-  };
-
-  Mood.Core = Core;
+  Mood.PRESETS = PRESETS;
 
   module.exports = Mood;
 

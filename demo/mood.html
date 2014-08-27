@@ -5,58 +5,62 @@
 <title>mood</title>
 </head>
 <body>
-<!-- 表情对应推荐文章 -->
+
+<h3>专区</h3>
+<div id="mood-zhuanqu"></div>
+
+<h3>新闻</h3>
+<div id="mood-news"></div>
+
+<h3>表情对应推荐文章</h3>
 <div class="mood-lists">
-  <div class="mood-list mood-list-1" style="display: none;">1</div>
-  <div class="mood-list mood-list-2" style="display: none;">2</div>
-  <div class="mood-list mood-list-3" style="display: none;">3</div>
-  <div class="mood-list mood-list-4" style="display: block;">4</div>
-  <div class="mood-list mood-list-5" style="display: none;">5</div>
-  <div class="mood-list mood-list-6" style="display: none;">6</div>
-  <div class="mood-list mood-list-7" style="display: none;">7</div>
+  <div class="mood-list" style="display: none;">1</div>
+  <div class="mood-list" style="display: none;">2</div>
+  <div class="mood-list" style="display: none;">3</div>
+  <div class="mood-list" style="display: block;">4</div>
+  <div class="mood-list" style="display: none;">5</div>
+  <div class="mood-list" style="display: none;">6</div>
+  <div class="mood-list" style="display: none;">7</div>
 </div>
-<script src="../vendor/jquery/jquery.js"></script>
+
 <script src="../vendor/seajs/sea.js"></script>
+
 <script>
   seajs.config({
     'base': '../sea-modules/',
-    'map': [
-      ['/sea-modules/jquery', '/vendor/jquery/jquery']
-    ],
     'alias': {
-      '$': 'jquery',
-      'handlebars': 'gallery/handlebars/1.3.0/handlebars-runtime',
-      'importstyle': 'pandora/importstyle/1.0.0/importstyle',
-      'widget': 'pandora/widget/1.0.0/widget',
-      'tips': 'pandora/dialog/1.0.0/tips',
+      '$': 'jquery/jquery/1.11.1/jquery',
       'mood': 'pandora/mood/1.0.0/mood'
-    }
+    }/*,
+    'map': [
+      [/jquery\.js$/, 'jquery-debug.js']
+    ]*/
   });
-  seajs.use('mood', function (Mood) {
-    var mood1 = new Mood({
-      container: $('<div/>').appendTo(document.body),
-      channelId: '10009',
+  seajs.use(['$', 'mood'], function ($, Mood) {
+
+    new Mood({
+      element: '#mood-zhuanqu',
+      channel: '10009',
       webId: '2814902',
-      kindId: '1',
-      delegates: {
-        'mouseover .ue-mood-item': function (e) {
-          var el = e.currentTarget;
-          $('.mood-list-' + ($(el).index() + 1)).show()
+      kind: '1',
+      url: 'http://hits.17173.com/mood/mood_opb.php?jsonp=?',
+      events: {
+        enter: function(e, index) {
+          $('.mood-lists').children(':eq(' + index + ')').show()
             .siblings(':visible').hide();
         }
       }
     });
 
-    var mood2 = new Mood({
-      container: $('<div/>').appendTo(document.body),
-      channelId: '10009',
+    new Mood({
+      element: '#mood-news',
+      channel: '10009',
       webId: '2814902',
-      kindId: '1',
+      kind: '1',
       moods: 'NEWS',
-      delegates: {
-        'mouseover .ue-mood-item': function (e) {
-          var el = e.currentTarget;
-          $('.mood-list-' + ($(el).index() + 1)).show()
+      events: {
+        enter: function(e, index) {
+          $('.mood-lists').children(':eq(' + index + ')').show()
             .siblings(':visible').hide();
         }
       }
