@@ -3,11 +3,17 @@
 <head>
 <meta charset="utf-8">
 <title>mood</title>
+<script src="//ue.17173cdn.com/a/lib/pandora.js"></script>
 </head>
 <body>
 
 <h3>专区</h3>
-<div id="mood-zhuanqu"></div>
+<div id="mood-zhuanqu"
+  data-widget="mood"
+  data-widget-channel="10009"
+  data-widget-web-id="2814902"
+  data-widget-kind="1"
+  ></div>
 
 <h3>新闻</h3>
 <div id="mood-news"></div>
@@ -23,35 +29,8 @@
   <div class="mood-list" style="display: none;">7</div>
 </div>
 
-<script src="../vendor/seajs/sea.js"></script>
-
 <script>
-  seajs.config({
-    'base': '../sea-modules/',
-    'alias': {
-      '$': 'jquery/jquery/1.11.1/jquery',
-      'mood': 'pandora/mood/1.0.0/mood'
-    }/*,
-    'map': [
-      [/jquery\.js$/, 'jquery-debug.js']
-    ]*/
-  });
-  seajs.use(['$', 'mood'], function ($, Mood) {
-
-    new Mood({
-      element: '#mood-zhuanqu',
-      channel: '10009',
-      webId: '2814902',
-      kind: '1',
-      url: 'http://hits.17173.com/mood/mood_opb.php?jsonp=?',
-      events: {
-        enter: function(e, index) {
-          $('.mood-lists').children(':eq(' + index + ')').show()
-            .siblings(':visible').hide();
-        }
-      }
-    });
-
+  pandora.use(['$', 'mood'], function($, Mood) {
     new Mood({
       element: '#mood-news',
       channel: '10009',

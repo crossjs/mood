@@ -13,7 +13,8 @@
   "freeze": false,
   "globals": {
     "define": true,
-    "seajs": true
+    "seajs": true,
+    "pandora": true
   },
   "immed": true,
   "indent": false,

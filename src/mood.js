@@ -164,7 +164,7 @@ define(function(require, exports, module) {
       /**
        * 通知鼠标移出投票项
        *
-       * @event enter
+       * @event leave
        * @param {object} e Event.
        * @param {number} index 投票项索引值
        */
